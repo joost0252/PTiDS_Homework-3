@@ -3,7 +3,7 @@
 #############################################
 
 packages <- c(
-  "knitr", "readr", "dplyr",
+  "knitr", "readr", "dplyr", "plyr"
   "here", # for the project's organization
   "tidyverse", "kableExtra", "microbenchmark",
   "ggplot2", "plot.matrix", "rstan", "quanteda",
