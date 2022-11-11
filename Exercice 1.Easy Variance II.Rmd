@@ -41,16 +41,41 @@ readRDS("test1.rds")
 1. Using your most efficient implementation of the bootstrap from the previous homework, write a function named `bootstrap` with arguments `x` for a vector of sample data, `B` for the number of bootstrapped samples with default values `1000L` and `statistic` for a generic function to be passed. The function must return a list with the statistic evaluated on the sample `x`, say `theta_hat`, on the bootstrapped samples, say `theta_star`, and an estimate of the variance of the statistic, say `varBoot`.
 
 ```{r echo = FALSE, include = FALSE, message = FALSE}
-supermarket <- read.csv("supermarket_sales.csv")
-unitPrice <- as.matrix(supermarket[,7])
 
-# statistic on the sample 
-têta_hat_mean <- mean(unitPrice)       # mean of unit price (theoretical)
-têta_hat_median <- median(unitPrice)   # median of unit price (theoretical)
-têta_hat_max <- max(unitPrice)         # max of unit price (theoretical)
+#turn on set.seed() if you want the results not to vary
+set.seed(626)
 
-B <- 1000                     #number of iteration
+#B = 1000L                             #  Number of bootstrapped samples with default values 1000L
+#variance statistic
+"variance_statistic <- function(x) { 
+  mean((x – mean(x))^2) 
+  }                                    # statistic for a generic function to be passed
+  "
 
+# Bootstrap with a for loop 
+ 
+Bootstrap <- function(data, B ){
+  thêta_hat<- rep(0,B)
+  thêta_star <- rep(0,B)
+  
+  # for the bootstrap estimate : list with the statistic evaluated on the sample x
+  for (i in 1:B) {
+  thêta_hat[i] <- var(sample(x, replace = TRUE))                    
+  }
+  
+   # for the bootstrap estimate : on the bootstrapped samples (on têta_hat)
+  for (i in 1:B) {
+  thêta_star[i] <- var(sample(thêta_hat, replace = TRUE))                    
+  }
+  
+  # for varBoot
+  n <- length(thêta_hat)
+  varBoot <- var(thêta_hat) * (n-1)/n
+  
+  # for the output
+  my_return <- list("thêta_hat" = thêta_hat, "theta_star" = thêta_star, "varBoot" = varBoot)
+  return(my_return) 
+}
 ```
 
 
@@ -58,11 +83,85 @@ B <- 1000                     #number of iteration
 
 ```{r echo = FALSE, include = FALSE, message = FALSE}
 
+# for the sample of size $10^4$ from a $t$-distribution with $\nu=3$ degrees of freedom
+
+samplesize <- 1:10^4                                                    #size of the sample
+mydata <- dt(samplesize, df = 3)                                        # data we will boostrap 
+
+# Bootstraping in full sample
+full_sample <- Bootstrap(data = mydata, B = 1000L)
+plot_full <- ggplot(as.data.frame(full_sample), aes(y=thêta_hat)) + 
+  geom_boxplot(notch=TRUE) #+ 
+  #geom_hline(yintercept = full_sample$varBoot)
+#+ geom_hline(yintercept=true_variance, color= "red")
+
+# Subsample for size 100
+
+Subsample_100 <- dt((1:100), df = 3)   
+boostrap_Subsample_100 <- Bootstrap(data = Subsample_100, B = 1000L)
+plot_100 <- ggplot(as.data.frame(boostrap_Subsample_100), aes(y=thêta_hat)) + 
+  geom_boxplot(notch=TRUE) 
+#+ geom_hline(yintercept=true_variance, color= "red")
+
+# Subsample for size 1
+
+Subsample_1 <- dt((1), df = 3)   
+boostrap_Subsample_1 <- Bootstrap(data = Subsample_1, B = 1000L)
+plot_1 <- ggplot(as.data.frame(boostrap_Subsample_1), aes(y=thêta_hat)) + 
+  geom_boxplot(notch=TRUE) 
+#+ geom_hline(yintercept=true_variance, color= "red")
+
+# Subsample for size 100
+
+Subsample_000 <- dt((000), df = 3)   
+boostrap_Subsample_000 <- Bootstrap(data = Subsample_000, B = 1000L)
+plot_000 <- ggplot(as.data.frame(boostrap_Subsample_000), aes(y=thêta_hat)) + 
+  geom_boxplot(notch=TRUE) 
+#+ geom_hline(yintercept=true_variance, color= "red")
+
+# Compute the true variance
+v = (n-1)
+true_variance <- v/(v-2)
+```
+
+```{r echo = FALSE, include = FALSE, message = FALSE}
+#create 4 subsample to generate 4 grapph : subsample(100) , subsample(1), subsample(000), entire sample
+#The true variance is given by ν/(ν−2, add a line on the 3 graph
+library(ggplot2)
+library(gridExtra)
+
+
+grid.arrange(plot_full, plot_100,plot_1,plot_000,  nrow = 1)
+
 ```
 
 3.  Take the one of the subsample of 2., and compare the performances between your implementation of `bootstrap` with the function bootstrap from the bootstrap package (installation required). Make sure the comparison is as fair as possible (same number of bootstrap samples, ...).
 
 ```{r echo = FALSE, include = FALSE, message = FALSE}
+#compare the performances
+
+# Profiling boostrap_Subsample_100
+
+set.seed(626)
+profvis::profvis({
+Subsample_100 <- dt((1:100), df = 3)   
+boostrap_Subsample_100 <- Bootstrap(data = Subsample_100, B = 1000L)
+
+  })
+
+# Profiling Bootstrap with bootstrap package from R
+set.seed(626)
+profvis::profvis({
+  
+output_bootstrap_package  <- boot(mydata, statistic = var, R=1000L)
+  })
+
+# Performing B = 1000L replications with boot 
+output_bootstrap_package  <- boot(x, statistic = variance_statistic, R=1000L)
+
+# Plotting the output
+output_bootstrap_package
+plot(output_bootstrap_package)
 
 ```
 
@@ -75,3 +174,27 @@ Adapt your implementation until this error message shows.
 ```{r }
 
 ```
+
+5. Load `test2.rds` and execute `bootstrap(M, statistic = mean)`. The call must returns the following warning:
+```{r}
+Warning message:
+In bootstrap(M, statistic = mean) : 'x' has been coerced to a vector
+```
+it means that `M` is treated as a vector (dim is NULL). Modify your implementation in order to coerce `M` to a vector and show the above warning once the coercion happens.
+
+6. Modify your implementation of `bootstrap` so `bootstrap(M, B="a", statistic = mean)` shows the following error
+```{r}
+Error in bootstrap(M, B = "a", statistic = mean) : 'B' must be numeric
+```
+
+7. Modify your implementation of `bootstrap` so `bootstrap(M, statistic = "mean")` shows the following error
+```{r}
+Error in bootstrap(M, statistic = "mean"") : 'statistic' must be a function
+```
+
+8. Load `test3.rds` and see what happens when executing `bootstrap(m, statistic = mean)`. Remove any missing value from `m` and re-run the function calls. Removing missing values should happen within the function calls. The function `mean` has an argument for removing missing values, namely `mean(m, na.rm=TRUE)`. You are to exploit that, but `bootstrap(m, statistic = mean(na.rm = TRUE))` does not work (try it).  Modify your implementation by using `...` as an argument in order for `bootstrap(m, statistic = mean, na.rm = TRUE)` to return the expected results.
+
+```{r }
+
+```
+
