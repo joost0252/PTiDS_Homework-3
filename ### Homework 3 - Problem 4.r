@@ -98,15 +98,15 @@ loss <- function(parameters){
 
 
 #7 minimze loss function with optim() function. Use method = "L-BFGS-B" and restrict parameters to be positive lower = 
-params_opt <- optim(par = c(0.5,0.5,0.5), fn = loss, method = "L-BFGS-B", lower = c(0,0,0), upper = c(1,1,1))
+params_opt <- optim(par = params_0, fn = loss, method = "L-BFGS-B", lower = c(0,0,0), upper = c(1,1,1))
 params_opt
 
 #8) run ode (Z0,times,sird model,params_opt) and plot the zfit and Z_data
 Z_exo <- melt(Z_data) # melt Z_data better layout for plotting
 Z_2<-Z_exo[152:nrow(Z_exo),] # remove t values
 
-Zfit_1 <- ode(y = Z_0, times = time, func = sird_model, parms = c(0.200046614,0.050020239,0.001019504))  %>% melt()
-Zfit_1
+Zfit_1 <- ode(y = Z_0, times = time, func = sird_model, parms = c(0.199993809,0.049990838,0.001011214 ))  %>% melt()
+
 Zfit_2<-Zfit_1[152:755,] # remove time
 
 
