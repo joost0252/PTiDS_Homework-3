@@ -18,23 +18,6 @@ knitr::opts_chunk$set(echo = TRUE)
 The bootstrap is a straightforward method for estimating quantities for a statistic such as an estimator of its variance. 
 
 
-```{r echo = FALSE, include = FALSE, message = FALSE}
-readRDS("test1.rds")
-
-setwd(here::here(("Ressources/")))
-
-test1 <- readr::readRDS("test1.rds")
-
-setwd("Ressources")
-list.files()
-t1 = readRDS("test1.rds") head(t1)
-
- test1 <- file.choose()
- test1_test <- readRDS(test1)
-
-readRDS("test1.rds")
-```
-
 #### Exercise Solving
 
 
@@ -45,7 +28,7 @@ readRDS("test1.rds")
 #turn on set.seed() if you want the results not to vary
 set.seed(626)
 
-#B = 1000L                             #  Number of bootstrapped samples with default values 1000L
+B = 1000L                             #  Number of bootstrapped samples with default values 1000L
 #variance statistic
 "variance_statistic <- function(x) { 
   mean((x – mean(x))^2) 
@@ -54,13 +37,19 @@ set.seed(626)
 
 # Bootstrap with a for loop 
  
-Bootstrap <- function(data, B ){
+ Statistic <- as.matrix(c("var", "mean"))
+  var <- Statistic[1,1]
+  mean <- Statistic[2,1]
+  
+Bootstrap <- function(data, B, Statistic) {
   thêta_hat<- rep(0,B)
   thêta_star <- rep(0,B)
   
-  # for the bootstrap estimate : list with the statistic evaluated on the sample x
+  if (Statistic == "var") {
+    
+     # for the bootstrap estimate : list with the statistic evaluated on the sample x
   for (i in 1:B) {
-  thêta_hat[i] <- var(sample(x, replace = TRUE))                    
+  thêta_hat[i] <- var(sample(data, replace = TRUE))                    
   }
   
    # for the bootstrap estimate : on the bootstrapped samples (on têta_hat)
@@ -69,12 +58,33 @@ Bootstrap <- function(data, B ){
   }
   
   # for varBoot
-  n <- length(thêta_hat)
-  varBoot <- var(thêta_hat) * (n-1)/n
+  n <- as.numeric (length(thêta_hat))
+  varBoot <- as.numeric (var(thêta_hat) *  ((n - 1) / n))
   
   # for the output
   my_return <- list("thêta_hat" = thêta_hat, "theta_star" = thêta_star, "varBoot" = varBoot)
   return(my_return) 
+  }
+  
+   if (Statistic == "mean") {
+      # for the bootstrap estimate : list with the statistic evaluated on the sample x
+  for (i in 1:B) {
+  thêta_hat[i] <- mean(sample(data, replace = TRUE))                    
+  }
+  
+   # for the bootstrap estimate : on the bootstrapped samples (on têta_hat)
+  for (i in 1:B) {
+  thêta_star[i] <- mean(sample(thêta_hat, replace = TRUE))                    
+  }
+  
+  # for varBoot
+  n <- as.numeric (length(thêta_hat))
+  varBoot <- as.numeric (mean(thêta_hat) *  ((n - 1) / n))
+  
+  # for the output
+  my_return <- list("thêta_hat" = thêta_hat, "theta_star" = thêta_star, "varBoot" = varBoot)
+  return(my_return) 
+   }
 }
 ```
 
@@ -89,16 +99,17 @@ samplesize <- 1:10^4                                                    #size of
 mydata <- dt(samplesize, df = 3)                                        # data we will boostrap 
 
 # Bootstraping in full sample
-full_sample <- Bootstrap(data = mydata, B = 1000L)
+full_sample <- Bootstrap(data = mydata, B = 1000L, Statistic = var)
 plot_full <- ggplot(as.data.frame(full_sample), aes(y=thêta_hat)) + 
-  geom_boxplot(notch=TRUE) #+ 
+  geom_boxplot(notch=TRUE) 
+#+ 
   #geom_hline(yintercept = full_sample$varBoot)
 #+ geom_hline(yintercept=true_variance, color= "red")
 
 # Subsample for size 100
 
 Subsample_100 <- dt((1:100), df = 3)   
-boostrap_Subsample_100 <- Bootstrap(data = Subsample_100, B = 1000L)
+boostrap_Subsample_100 <- Bootstrap(data = Subsample_100, B = 1000L, Statistic = var)
 plot_100 <- ggplot(as.data.frame(boostrap_Subsample_100), aes(y=thêta_hat)) + 
   geom_boxplot(notch=TRUE) 
 #+ geom_hline(yintercept=true_variance, color= "red")
@@ -106,7 +117,7 @@ plot_100 <- ggplot(as.data.frame(boostrap_Subsample_100), aes(y=thêta_hat)) +
 # Subsample for size 1
 
 Subsample_1 <- dt((1), df = 3)   
-boostrap_Subsample_1 <- Bootstrap(data = Subsample_1, B = 1000L)
+boostrap_Subsample_1 <- Bootstrap(data = Subsample_1, B = 1000L, Statistic = var)
 plot_1 <- ggplot(as.data.frame(boostrap_Subsample_1), aes(y=thêta_hat)) + 
   geom_boxplot(notch=TRUE) 
 #+ geom_hline(yintercept=true_variance, color= "red")
@@ -114,14 +125,14 @@ plot_1 <- ggplot(as.data.frame(boostrap_Subsample_1), aes(y=thêta_hat)) +
 # Subsample for size 100
 
 Subsample_000 <- dt((000), df = 3)   
-boostrap_Subsample_000 <- Bootstrap(data = Subsample_000, B = 1000L)
+boostrap_Subsample_000 <- Bootstrap(data = Subsample_000, B = 1000L, Statistic = var)
 plot_000 <- ggplot(as.data.frame(boostrap_Subsample_000), aes(y=thêta_hat)) + 
   geom_boxplot(notch=TRUE) 
 #+ geom_hline(yintercept=true_variance, color= "red")
 
 # Compute the true variance
-v = (n-1)
-true_variance <- v/(v-2)
+v = (3-1)
+true_variance <- (v/(v-2))
 ```
 
 ```{r echo = FALSE, include = FALSE, message = FALSE}
@@ -145,7 +156,7 @@ grid.arrange(plot_full, plot_100,plot_1,plot_000,  nrow = 1)
 set.seed(626)
 profvis::profvis({
 Subsample_100 <- dt((1:100), df = 3)   
-boostrap_Subsample_100 <- Bootstrap(data = Subsample_100, B = 1000L)
+boostrap_Subsample_100 <- Bootstrap(data = Subsample_100, B = 1000L, Statistic = var)
 
   })
 
@@ -156,9 +167,6 @@ profvis::profvis({
 output_bootstrap_package  <- boot(mydata, statistic = var, R=1000L)
   })
 
-# Performing B = 1000L replications with boot 
-output_bootstrap_package  <- boot(x, statistic = variance_statistic, R=1000L)
-
 # Plotting the output
 output_bootstrap_package
 plot(output_bootstrap_package)
@@ -166,35 +174,334 @@ plot(output_bootstrap_package)
 ```
 
 4.  Load `test1.rds` and make this call `bootstrap(a, statistic = mean)`. The call must returns the following error:
-```{r}
-Error in bootstrap(a, statistic = mean) : 'x' must be numeric
+```{r echo = FALSE, include = FALSE, message = FALSE}
+library(rstan)
+test1 <- readRDS("~/Desktop/GitHub/homework-3-group_f/test1.rds")
+typeof(test1)
+a <- test1
+
+Bootstrap <- function(data, B, Statistic) {
+  
+  # Error and Warning message 
+  if (typeof(data) == "character") {
+      stop(" 'x' must be numeric")
+  }
+  
+  # Code if everything is okay
+  else {
+    
+    thêta_hat<- rep(0,B)
+    thêta_star <- rep(0,B)
+    
+  if (Statistic == "var") {
+    
+     # for the bootstrap estimate : list with the statistic evaluated on the sample x
+  for (i in 1:B) {
+  thêta_hat[i] <- var(sample(data, replace = TRUE))                    
+  }
+  
+   # for the bootstrap estimate : on the bootstrapped samples (on têta_hat)
+  for (i in 1:B) {
+  thêta_star[i] <- var(sample(thêta_hat, replace = TRUE))                    
+  }
+  
+  # for varBoot
+  n <- as.numeric (length(thêta_hat))
+  varBoot <- as.numeric (var(thêta_hat) *  ((n - 1) / n))
+  
+  # for the output
+  my_return <- list("thêta_hat" = thêta_hat, "theta_star" = thêta_star, "varBoot" = varBoot)
+  return(my_return) 
+  }
+  
+   if (Statistic == "mean") {
+      # for the bootstrap estimate : list with the statistic evaluated on the sample x
+  for (i in 1:B) {
+  thêta_hat[i] <- mean(sample(data, replace = TRUE))                    
+  }
+  
+   # for the bootstrap estimate : on the bootstrapped samples (on têta_hat)
+  for (i in 1:B) {
+  thêta_star[i] <- mean(sample(thêta_hat, replace = TRUE))                    
+  }
+  
+  # for varBoot
+  n <- as.numeric (length(thêta_hat))
+  varBoot <- as.numeric (mean(thêta_hat) *  ((n - 1) / n))
+  
+  # for the output
+  my_return <- list("thêta_hat" = thêta_hat, "theta_star" = thêta_star, "varBoot" = varBoot)
+  return(my_return) 
+   }
+  }
+}
+
 ```
 Adapt your implementation until this error message shows.
 
 ```{r }
-
+# Bootstrap(a, statistic = mean)
+Bootstrap(data = a , B = 1000L, Statistic = mean)
 ```
 
 5. Load `test2.rds` and execute `bootstrap(M, statistic = mean)`. The call must returns the following warning:
 ```{r}
-Warning message:
-In bootstrap(M, statistic = mean) : 'x' has been coerced to a vector
+library(rstan)
+test2 <- load("~/Desktop/GitHub/homework-3-group_f/test2.rds")
+typeof(test2)
+M <- test2
+
+Bootstrap <- function(data, B, Statistic) {
+  
+  # Error and Warning message 
+  if (typeof(data) == "character") {
+      warning(" 'x' has been coerced to a vector")
+      data <- as.vector(data)
+  }
+  
+  # Code if everything is okay
+  else {
+    
+    thêta_hat<- rep(0,B)
+    thêta_star <- rep(0,B)
+    
+  if (Statistic == "var") {
+    
+     # for the bootstrap estimate : list with the statistic evaluated on the sample x
+  for (i in 1:B) {
+  thêta_hat[i] <- var(sample(data, replace = TRUE))                    
+  }
+  
+   # for the bootstrap estimate : on the bootstrapped samples (on têta_hat)
+  for (i in 1:B) {
+  thêta_star[i] <- var(sample(thêta_hat, replace = TRUE))                    
+  }
+  
+  # for varBoot
+  n <- as.numeric (length(thêta_hat))
+  varBoot <- as.numeric (var(thêta_hat) *  ((n - 1) / n))
+  
+  # for the output
+  my_return <- list("thêta_hat" = thêta_hat, "theta_star" = thêta_star, "varBoot" = varBoot)
+  return(my_return) 
+  }
+  
+   if (Statistic == "mean") {
+      # for the bootstrap estimate : list with the statistic evaluated on the sample x
+  for (i in 1:B) {
+  thêta_hat[i] <- mean(sample(data, replace = TRUE))                    
+  }
+  
+   # for the bootstrap estimate : on the bootstrapped samples (on têta_hat)
+  for (i in 1:B) {
+  thêta_star[i] <- mean(sample(thêta_hat, replace = TRUE))                    
+  }
+  
+  # for varBoot
+  n <- as.numeric (length(thêta_hat))
+  varBoot <- as.numeric (mean(thêta_hat) *  ((n - 1) / n))
+  
+  # for the output
+  my_return <- list("thêta_hat" = thêta_hat, "theta_star" = thêta_star, "varBoot" = varBoot)
+  return(my_return) 
+   }
+  }
+}
 ```
 it means that `M` is treated as a vector (dim is NULL). Modify your implementation in order to coerce `M` to a vector and show the above warning once the coercion happens.
 
-6. Modify your implementation of `bootstrap` so `bootstrap(M, B="a", statistic = mean)` shows the following error
 ```{r}
-Error in bootstrap(M, B = "a", statistic = mean) : 'B' must be numeric
+
+Bootstrap(M,B = 1000L, Statistic = mean)
+```
+
+6. Modify your implementation of `bootstrap` so `bootstrap(M, B="a", statistic = mean)` shows the following error
+
+```{r}
+#Error in bootstrap(M, B = "a", statistic = mean) : 'B' must be numeric
+
+Bootstrap <- function(data, B, Statistic) {
+  
+  # Error and Warning message 
+  if (typeof(B) != "numeric") {
+      stop(" 'B' must be numeric")
+  }
+  
+  # Code if everything is okay
+  else {
+    thêta_hat <- rep(0,B)
+    thêta_star <- rep(0,B)
+  
+  if (Statistic == "var") {
+    
+     # for the bootstrap estimate : list with the statistic evaluated on the sample x
+  for (i in 1:B) {
+  thêta_hat[i] <- var(sample(data, replace = TRUE))                    
+  }
+  
+   # for the bootstrap estimate : on the bootstrapped samples (on têta_hat)
+  for (i in 1:B) {
+  thêta_star[i] <- var(sample(thêta_hat, replace = TRUE))                    
+  }
+  
+  # for varBoot
+  n <- as.numeric (length(thêta_hat))
+  varBoot <- as.numeric (var(thêta_hat) *  ((n - 1) / n))
+  
+  # for the output
+  my_return <- list("thêta_hat" = thêta_hat, "theta_star" = thêta_star, "varBoot" = varBoot)
+  return(my_return) 
+  }
+  
+   if (Statistic == "mean") {
+      # for the bootstrap estimate : list with the statistic evaluated on the sample x
+  for (i in 1:B) {
+  thêta_hat[i] <- mean(sample(data, replace = TRUE))                    
+  }
+  
+   # for the bootstrap estimate : on the bootstrapped samples (on têta_hat)
+  for (i in 1:B) {
+  thêta_star[i] <- mean(sample(thêta_hat, replace = TRUE))                    
+  }
+  
+  # for varBoot
+  n <- as.numeric (length(thêta_hat))
+  varBoot <- as.numeric (mean(thêta_hat) *  ((n - 1) / n))
+  
+  # for the output
+  my_return <- list("thêta_hat" = thêta_hat, "theta_star" = thêta_star, "varBoot" = varBoot)
+  return(my_return) 
+   }
+  }
+}
+```
+
+```{r}
+Bootstrap(M, B = "a", Statistic = mean)
 ```
 
 7. Modify your implementation of `bootstrap` so `bootstrap(M, statistic = "mean")` shows the following error
 ```{r}
-Error in bootstrap(M, statistic = "mean"") : 'statistic' must be a function
+#Error in bootstrap(M, statistic = "mean"") : 'statistic' must be a function
+
+
+Bootstrap <- function(data, B, Statistic) {
+  
+  # Error and Warning message 
+  if (Statistic == "var") {
+    stati <- as.function(var)
+  }
+  if (Statistic = "mean") {
+    stati <- as.function(mean)
+  }
+  else if (is.function(Statistic) != TRUE) {
+      stop(" 'Statistic' must be a function")
+  }
+  
+  # Code if everything is okay
+  else {
+      
+    thêta_hat <- rep(0,B)
+    thêta_star <- rep(0,B)
+    
+     # for the bootstrap estimate : list with the statistic evaluated on the sample x
+  for (i in 1:B) {
+  thêta_hat[i] <- p(sample(data, replace = TRUE))                    
+  }
+  
+   # for the bootstrap estimate : on the bootstrapped samples (on têta_hat)
+  for (i in 1:B) {
+  thêta_star[i] <- p(sample(thêta_hat, replace = TRUE))                    
+  }
+  
+  # for varBoot
+  n <- as.numeric (length(thêta_hat))
+  varBoot <- as.numeric (p(thêta_hat) *  ((n - 1) / n))
+  
+  # for the output
+  my_return <- list("thêta_hat" = thêta_hat, "theta_star" = thêta_star, "varBoot" = varBoot)
+  return(my_return) 
+ 
+  }
+}
 ```
 
+```{r}
+Bootstrap(mydata, B = 1000L, Statistic = mean)
+#Bootstrap(M, B = "a", Statistic = "mean")
+```
+
+7.test
+
+```{r}
+#Error in bootstrap(M, B = "a", statistic = mean) : 'B' must be numeric
+
+Bootstrap <- function(data, B, Statistic) {
+  
+  # Error and Warning message 
+ if (is.function(Statistic) != TRUE) {
+      stop(" 'Statistic' must be a function")
+  }
+  
+  # Code if everything is okay
+  else {
+    thêta_hat <- rep(0,B)
+    thêta_star <- rep(0,B)
+  
+  if (Statistic == "var") {
+    
+     # for the bootstrap estimate : list with the statistic evaluated on the sample x
+  for (i in 1:B) {
+  thêta_hat[i] <- var(sample(data, replace = TRUE))                    
+  }
+  
+   # for the bootstrap estimate : on the bootstrapped samples (on têta_hat)
+  for (i in 1:B) {
+  thêta_star[i] <- var(sample(thêta_hat, replace = TRUE))                    
+  }
+  
+  # for varBoot
+  n <- as.numeric (length(thêta_hat))
+  varBoot <- as.numeric (var(thêta_hat) *  ((n - 1) / n))
+  
+  # for the output
+  my_return <- list("thêta_hat" = thêta_hat, "theta_star" = thêta_star, "varBoot" = varBoot)
+  return(my_return) 
+  }
+  
+   if (Statistic == "mean") {
+      # for the bootstrap estimate : list with the statistic evaluated on the sample x
+  for (i in 1:B) {
+  thêta_hat[i] <- mean(sample(data, replace = TRUE))                    
+  }
+  
+   # for the bootstrap estimate : on the bootstrapped samples (on têta_hat)
+  for (i in 1:B) {
+  thêta_star[i] <- mean(sample(thêta_hat, replace = TRUE))                    
+  }
+  
+  # for varBoot
+  n <- as.numeric (length(thêta_hat))
+  varBoot <- as.numeric (mean(thêta_hat) *  ((n - 1) / n))
+  
+  # for the output
+  my_return <- list("thêta_hat" = thêta_hat, "theta_star" = thêta_star, "varBoot" = varBoot)
+  return(my_return) 
+   }
+  }
+}
+```
 8. Load `test3.rds` and see what happens when executing `bootstrap(m, statistic = mean)`. Remove any missing value from `m` and re-run the function calls. Removing missing values should happen within the function calls. The function `mean` has an argument for removing missing values, namely `mean(m, na.rm=TRUE)`. You are to exploit that, but `bootstrap(m, statistic = mean(na.rm = TRUE))` does not work (try it).  Modify your implementation by using `...` as an argument in order for `bootstrap(m, statistic = mean, na.rm = TRUE)` to return the expected results.
 
 ```{r }
 
+library(rstan)
+test3 <- load("~/Desktop/GitHub/homework-3-group_f/test3.rds")
+typeof(test3)
+m <- test2
+
+write.csv(as.matrix(test3),file="file.csv")
+readRDS("test2.rds")
+infoRDS("test2.rds")
 ```
 

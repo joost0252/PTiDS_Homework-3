@@ -3,11 +3,12 @@
 #############################################
 
 packages <- c(
-  "knitr", "readr", "dplyr", "plyr"
+  "knitr", "readr", "dplyr", "plyr",
   "here", # for the project's organization
   "tidyverse", "kableExtra", "microbenchmark",
   "ggplot2", "plot.matrix", "rstan", "quanteda",
-  "quanteda.textstats", "lexicon", "tidytext", "reshape2"
+  "quanteda.textstats", "lexicon", "tidytext", "reshape2",
+  "rstan" #readRDS
 )
 
 purrr::walk(packages, library, character.only = TRUE)
