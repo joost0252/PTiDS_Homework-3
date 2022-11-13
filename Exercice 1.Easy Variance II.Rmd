@@ -28,18 +28,11 @@ The bootstrap is a straightforward method for estimating quantities for a statis
 #turn on set.seed() if you want the results not to vary
 set.seed(626)
 
-B = 1000L                             #  Number of bootstrapped samples with default values 1000L
-#variance statistic
-"variance_statistic <- function(x) { 
-  mean((x – mean(x))^2) 
-  }                                    # statistic for a generic function to be passed
-  "
+B = 1000L                                  #  Number of bootstrapped samples with default values 1000L
+Statistic <- as.list(c("var", "mean"))
 
 # Bootstrap with a for loop 
  
- Statistic <- as.matrix(c("var", "mean"))
-  var <- Statistic[1,1]
-  mean <- Statistic[2,1]
   
 Bootstrap <- function(data, B, Statistic) {
   thêta_hat<- rep(0,B)
@@ -133,61 +126,53 @@ plot_000 <- ggplot(as.data.frame(boostrap_Subsample_000), aes(y=thêta_hat)) +
 # Compute the true variance
 v = (3-1)
 true_variance <- (v/(v-2))
-```
 
-```{r echo = FALSE, include = FALSE, message = FALSE}
-#create 4 subsample to generate 4 grapph : subsample(100) , subsample(1), subsample(000), entire sample
-#The true variance is given by ν/(ν−2, add a line on the 3 graph
 library(ggplot2)
 library(gridExtra)
 
+```
 
+```{r, message = FALSE}
 grid.arrange(plot_full, plot_100,plot_1,plot_000,  nrow = 1)
-
 ```
 
 3.  Take the one of the subsample of 2., and compare the performances between your implementation of `bootstrap` with the function bootstrap from the bootstrap package (installation required). Make sure the comparison is as fair as possible (same number of bootstrap samples, ...).
 
-```{r echo = FALSE, include = FALSE, message = FALSE}
-#compare the performances
-
-# Profiling boostrap_Subsample_100
+```{r, message = FALSE}
+#compare the performances 
 
 set.seed(626)
+
 profvis::profvis({
+  # Profiling boostrap_Subsample_100
 Subsample_100 <- dt((1:100), df = 3)   
 boostrap_Subsample_100 <- Bootstrap(data = Subsample_100, B = 1000L, Statistic = var)
 
   })
+```
 
-# Profiling Bootstrap with bootstrap package from R
+```{r, message = FALSE}
+  # Profiling Bootstrap with bootstrap package from R
 set.seed(626)
 profvis::profvis({
   
-output_bootstrap_package  <- boot(mydata, statistic = var, R=1000L)
+boot(mydata, statistic = var, R=1000L)
   })
-
-# Plotting the output
-output_bootstrap_package
-plot(output_bootstrap_package)
 ```
-
+<br>
+<br>
 4.  Load `test1.rds` and make this call `bootstrap(a, statistic = mean)`. The call must returns the following error:
 ```{r echo = FALSE, include = FALSE, message = FALSE}
+
 library(rstan)
 test1 <- readRDS("~/Desktop/GitHub/homework-3-group_f/test1.rds")
 typeof(test1)
-a <- test1
-
-# add to Error and Warning message 
-
-  if (typeof(data) == "character") {
-      stop(" 'x' must be numeric")
-  }
+call(test1)
 
 ```
 
 ```{r echo = FALSE, include = FALSE, message = FALSE}
+# add to Error and Warning message 
 Bootstrap <- function(data, B, Statistic) {
   
   # Error and Warning message 
@@ -247,7 +232,7 @@ Bootstrap <- function(data, B, Statistic) {
 ```
 Adapt your implementation until this error message shows.
 
-```{r }
+```{r, error=TRUE}
 # Bootstrap(a, statistic = mean)
 Bootstrap(data = a , B = 1000L, Statistic = mean)
 ```
@@ -257,16 +242,13 @@ Bootstrap(data = a , B = 1000L, Statistic = mean)
 library(rstan)
 test2 <- load("~/Desktop/GitHub/homework-3-group_f/test2.rds")
 typeof(test2)
-M <- test2
 
-# add to Error and Warning message
-if (typeof(data) == "character") {
-    data <- as.vector(data)
-    warning(" 'x' has been coerced to a vector")
-}
+call(test2)
+
 ```
 
 ```{r echo = FALSE, include = FALSE, message = FALSE}
+# add to Error and Warning message
 Bootstrap <- function(data, B, Statistic) {
   
   # Error and Warning message 
@@ -276,8 +258,7 @@ Bootstrap <- function(data, B, Statistic) {
   }
   
   # Code if everything is okay
-  else {
-    
+  
     thêta_hat<- rep(0,B)
     thêta_star <- rep(0,B)
     
@@ -322,27 +303,19 @@ Bootstrap <- function(data, B, Statistic) {
   return(my_return) 
    }
   }
-}
 ```
 it means that `M` is treated as a vector (dim is NULL). Modify your implementation in order to coerce `M` to a vector and show the above warning once the coercion happens.
 
-```{r}
+```{r, error=TRUE}
 Bootstrap(M,B = 1000L, Statistic = mean)
 ```
 
 6. Modify your implementation of `bootstrap` so `bootstrap(M, B="a", statistic = mean)` shows the following error
 
-```{r}
+```{r echo = FALSE, include = FALSE, message = FALSE}
+
 #Error in bootstrap(M, B = "a", statistic = mean) : 'B' must be numeric
 # add to Error and Warning message 
-
-if (typeof(B) != "numeric") {
-      stop(" 'B' must be numeric")
-}
-
-```
-
-```{r echo = FALSE, include = FALSE, message = FALSE}
 Bootstrap <- function(data, B, Statistic) {
   
   # Error and Warning message 
@@ -399,26 +372,20 @@ Bootstrap <- function(data, B, Statistic) {
 }
 ```
 
-```{r}
+```{r, error=TRUE}
 Bootstrap(M, B = "a", Statistic = mean)
 ```
 
 7. Modify your implementation of `bootstrap` so `bootstrap(M, statistic = "mean")` shows the following error
 
-```{r, message = FALSE, warning=FALSE, error=FALSE}
+
+```{r echo = FALSE, include = FALSE, message = FALSE}
 #Error in bootstrap(M, statistic = "mean"") : 'statistic' must be a function
 #add to Error and Warning message section
 
- if (Statistic != "var" | Statistic != "mean" ) {
-      stop(" 'statistic' must be a function")
- }
-```
-
-```{r echo = FALSE, include = FALSE, message = FALSE}
 Bootstrap <- function(data, B, Statistic) {
   
   # Error and Warning message 
-  
   
   if (Statistic != "var" | Statistic != "mean" ) {
       stop(" 'statistic' must be a function")
@@ -474,20 +441,79 @@ Bootstrap <- function(data, B, Statistic) {
 }
 ```
 
-```{r}
+```{r, error=TRUE}
 Bootstrap(mydata, B = 1000L, Statistic = "mean")
 ```
 8. Load `test3.rds` and see what happens when executing `bootstrap(m, statistic = mean)`. Remove any missing value from `m` and re-run the function calls. Removing missing values should happen within the function calls. The function `mean` has an argument for removing missing values, namely `mean(m, na.rm=TRUE)`. You are to exploit that, but `bootstrap(m, statistic = mean(na.rm = TRUE))` does not work (try it).  Modify your implementation by using `...` as an argument in order for `bootstrap(m, statistic = mean, na.rm = TRUE)` to return the expected results.
 
 ```{r }
-
 library(rstan)
 test3 <- load("~/Desktop/GitHub/homework-3-group_f/test3.rds")
 typeof(test3)
-m <- test2
 
-write.csv(as.matrix(test3),file="file.csv")
-readRDS("test2.rds")
-infoRDS("test2.rds")
+call(test3)
+
+
 ```
 
+```{r}
+Bootstrap <- function(data, B, Statistic, na.rm) {
+  
+  if (na.rm == TRUE) {
+    na.omit(data)
+  }
+  
+  # Code if everything is okay
+  else {
+    
+    thêta_hat<- rep(0,B)
+    thêta_star <- rep(0,B)
+    
+  if (Statistic == "var") {
+    
+     # for the bootstrap estimate : list with the statistic evaluated on the sample x
+  for (i in 1:B) {
+  thêta_hat[i] <- var(sample(data, replace = TRUE))                    
+  }
+  
+   # for the bootstrap estimate : on the bootstrapped samples (on têta_hat)
+  for (i in 1:B) {
+  thêta_star[i] <- var(sample(thêta_hat, replace = TRUE))                    
+  }
+  
+  # for varBoot
+  n <- as.numeric (length(thêta_hat))
+  varBoot <- as.numeric (var(thêta_hat) *  ((n - 1) / n))
+  
+  # for the output
+  my_return <- list("thêta_hat" = thêta_hat, "theta_star" = thêta_star, "varBoot" = varBoot)
+  return(my_return) 
+  }
+  
+   if (Statistic == "mean") {
+      # for the bootstrap estimate : list with the statistic evaluated on the sample x
+  for (i in 1:B) {
+  thêta_hat[i] <- mean(sample(data, replace = TRUE))                    
+  }
+  
+   # for the bootstrap estimate : on the bootstrapped samples (on têta_hat)
+  for (i in 1:B) {
+  thêta_star[i] <- mean(sample(thêta_hat, replace = TRUE))                    
+  }
+  
+  # for varBoot
+  n <- as.numeric (length(thêta_hat))
+  varBoot <- as.numeric (mean(thêta_hat) *  ((n - 1) / n))
+  
+  # for the output
+  my_return <- list("thêta_hat" = thêta_hat, "theta_star" = thêta_star, "varBoot" = varBoot)
+  return(my_return) 
+   }
+  }
+}
+
+```
+
+```{r}
+Bootstrap(m, B = 1000L, Statistic = mean, na.rm = TRUE)
+```
