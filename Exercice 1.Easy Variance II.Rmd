@@ -170,7 +170,6 @@ output_bootstrap_package  <- boot(mydata, statistic = var, R=1000L)
 # Plotting the output
 output_bootstrap_package
 plot(output_bootstrap_package)
-
 ```
 
 4.  Load `test1.rds` and make this call `bootstrap(a, statistic = mean)`. The call must returns the following error:
@@ -180,6 +179,15 @@ test1 <- readRDS("~/Desktop/GitHub/homework-3-group_f/test1.rds")
 typeof(test1)
 a <- test1
 
+# add to Error and Warning message 
+
+  if (typeof(data) == "character") {
+      stop(" 'x' must be numeric")
+  }
+
+```
+
+```{r echo = FALSE, include = FALSE, message = FALSE}
 Bootstrap <- function(data, B, Statistic) {
   
   # Error and Warning message 
@@ -245,18 +253,26 @@ Bootstrap(data = a , B = 1000L, Statistic = mean)
 ```
 
 5. Load `test2.rds` and execute `bootstrap(M, statistic = mean)`. The call must returns the following warning:
-```{r}
+```{r echo = FALSE, include = FALSE, message = FALSE}
 library(rstan)
 test2 <- load("~/Desktop/GitHub/homework-3-group_f/test2.rds")
 typeof(test2)
 M <- test2
 
+# add to Error and Warning message
+if (typeof(data) == "character") {
+    data <- as.vector(data)
+    warning(" 'x' has been coerced to a vector")
+}
+```
+
+```{r echo = FALSE, include = FALSE, message = FALSE}
 Bootstrap <- function(data, B, Statistic) {
   
   # Error and Warning message 
   if (typeof(data) == "character") {
-      warning(" 'x' has been coerced to a vector")
-      data <- as.vector(data)
+    data <- as.vector(data)
+    warning(" 'x' has been coerced to a vector")
   }
   
   # Code if everything is okay
@@ -311,7 +327,6 @@ Bootstrap <- function(data, B, Statistic) {
 it means that `M` is treated as a vector (dim is NULL). Modify your implementation in order to coerce `M` to a vector and show the above warning once the coercion happens.
 
 ```{r}
-
 Bootstrap(M,B = 1000L, Statistic = mean)
 ```
 
@@ -319,7 +334,15 @@ Bootstrap(M,B = 1000L, Statistic = mean)
 
 ```{r}
 #Error in bootstrap(M, B = "a", statistic = mean) : 'B' must be numeric
+# add to Error and Warning message 
 
+if (typeof(B) != "numeric") {
+      stop(" 'B' must be numeric")
+}
+
+```
+
+```{r echo = FALSE, include = FALSE, message = FALSE}
 Bootstrap <- function(data, B, Statistic) {
   
   # Error and Warning message 
@@ -381,73 +404,32 @@ Bootstrap(M, B = "a", Statistic = mean)
 ```
 
 7. Modify your implementation of `bootstrap` so `bootstrap(M, statistic = "mean")` shows the following error
-```{r}
+
+```{r, message = FALSE, warning=FALSE, error=FALSE}
 #Error in bootstrap(M, statistic = "mean"") : 'statistic' must be a function
+#add to Error and Warning message section
 
+ if (Statistic != "var" | Statistic != "mean" ) {
+      stop(" 'statistic' must be a function")
+ }
+```
 
+```{r echo = FALSE, include = FALSE, message = FALSE}
 Bootstrap <- function(data, B, Statistic) {
   
   # Error and Warning message 
-  if (Statistic == "var") {
-    stati <- as.function(var)
-  }
-  if (Statistic = "mean") {
-    stati <- as.function(mean)
-  }
-  else if (is.function(Statistic) != TRUE) {
-      stop(" 'Statistic' must be a function")
+  
+  
+  if (Statistic != "var" | Statistic != "mean" ) {
+      stop(" 'statistic' must be a function")
   }
   
   # Code if everything is okay
   else {
-      
-    thêta_hat <- rep(0,B)
+    
+    thêta_hat<- rep(0,B)
     thêta_star <- rep(0,B)
     
-     # for the bootstrap estimate : list with the statistic evaluated on the sample x
-  for (i in 1:B) {
-  thêta_hat[i] <- p(sample(data, replace = TRUE))                    
-  }
-  
-   # for the bootstrap estimate : on the bootstrapped samples (on têta_hat)
-  for (i in 1:B) {
-  thêta_star[i] <- p(sample(thêta_hat, replace = TRUE))                    
-  }
-  
-  # for varBoot
-  n <- as.numeric (length(thêta_hat))
-  varBoot <- as.numeric (p(thêta_hat) *  ((n - 1) / n))
-  
-  # for the output
-  my_return <- list("thêta_hat" = thêta_hat, "theta_star" = thêta_star, "varBoot" = varBoot)
-  return(my_return) 
- 
-  }
-}
-```
-
-```{r}
-Bootstrap(mydata, B = 1000L, Statistic = mean)
-#Bootstrap(M, B = "a", Statistic = "mean")
-```
-
-7.test
-
-```{r}
-#Error in bootstrap(M, B = "a", statistic = mean) : 'B' must be numeric
-
-Bootstrap <- function(data, B, Statistic) {
-  
-  # Error and Warning message 
- if (is.function(Statistic) != TRUE) {
-      stop(" 'Statistic' must be a function")
-  }
-  
-  # Code if everything is okay
-  else {
-    thêta_hat <- rep(0,B)
-    thêta_star <- rep(0,B)
-  
   if (Statistic == "var") {
     
      # for the bootstrap estimate : list with the statistic evaluated on the sample x
@@ -490,6 +472,10 @@ Bootstrap <- function(data, B, Statistic) {
    }
   }
 }
+```
+
+```{r}
+Bootstrap(mydata, B = 1000L, Statistic = "mean")
 ```
 8. Load `test3.rds` and see what happens when executing `bootstrap(m, statistic = mean)`. Remove any missing value from `m` and re-run the function calls. Removing missing values should happen within the function calls. The function `mean` has an argument for removing missing values, namely `mean(m, na.rm=TRUE)`. You are to exploit that, but `bootstrap(m, statistic = mean(na.rm = TRUE))` does not work (try it).  Modify your implementation by using `...` as an argument in order for `bootstrap(m, statistic = mean, na.rm = TRUE)` to return the expected results.
 
