@@ -48,5 +48,4 @@ find_integral()
 # N = 100000   gives:  1.065235
 # N = 1000000  gives:  1.083766
 # N = 10000000 gives:  1.089825
-# As can be seen from 10^5, it does not have to be that it will get a better approximation. However, one can conclude that
-# in genereal the higher the N, the better approximation.
+# From the above results it can be concluded that increasing the N by tenfold will increase the accuracy of the approximation.
