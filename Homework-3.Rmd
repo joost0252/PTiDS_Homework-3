@@ -1,6 +1,6 @@
 ---
 title: "homework-3"
-author: "Amina Mohammed (17301920), Joost Dijkstra (2095148183),Edward Tandia (17310806)"
+author: "Amina Mohammed (17301920), Joost Dijkstra (1251785),Edward Tandia (17310806)"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: html_document
 ---
@@ -146,8 +146,6 @@ library(gridExtra)
 I have simulate a sample of size $10^4$ from a $t$-distribution with $\nu=3$ degrees of freedom. I have run 3 different boostraps using variance `var` as the `statistic`, for the following subsamples of size $100$, $1,000$  with  $B=1,000$. You can see the four boxplots.
 
 When we compare the output with the true variance, which is given by $\nu/(\nu-2)$ = `r true_variance`. We can observe that `r true_variance`  is really high compare to the `r `varboot`. 
-
-Does it illustrate some concepts in statistics or probability theory? *ANSWER TO IT*
 
 <br>
 
