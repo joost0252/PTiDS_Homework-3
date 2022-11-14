@@ -29,7 +29,9 @@ The bootstrap is a straightforward method for estimating quantities for a statis
 set.seed(626)
 
 B = 1000L                                  #  Number of bootstrapped samples with default values 1000L
-Statistic <- as.list(c("var", "mean"))
+Statistic <- as.data.frame(matrix(c("var", "mean")))
+var <- Statistic[1,1]
+mean <- Statistic[2,1]
 
 # Bootstrap with a for loop 
  
@@ -37,6 +39,7 @@ Statistic <- as.list(c("var", "mean"))
 Bootstrap <- function(data, B, Statistic) {
   thêta_hat<- rep(0,B)
   thêta_star <- rep(0,B)
+  
   
   if (Statistic == "var") {
     
@@ -81,6 +84,21 @@ Bootstrap <- function(data, B, Statistic) {
 }
 ```
 
+My most efficient implementation of the bootstrap from the previous homework was the for loop. Based on this, I create function with 3 input: <i> data, B, Statistic </i>. <br>
+
+- <i> data </i>: is the data input <br>
+- <i> B </i>: is the number of bootstrapped samples with default values <br>
+- <i> Statistic </i>: is the statistcic which the user can selected. It has to be a function; either mean or variance. <br>
+
+the function `Bootstrap` will return 3 output: <i> theta_hat, theta_star, varBoot </i>
+
+- <i> theta_hat </i>: is a list with the statistic evaluated on the sample <br>
+- <i> theta_star </i>: is a list with the statistic on the bootstrapped samples<br>
+- <i> varBoot </i>: is the estimate of the variance of the statistic. <br>
+
+I used for loops and multiple if conditioning in order to build my function.
+
+<br>
 
 2.  Simulate a sample of size $10^4$ from a $t$-distribution with $\nu=3$ degrees of freedom (when $\nu\to\infty$, then the $t$-distribution tends to a standard normal distribution). Using the base R variance `var` as the `statistic`, compute the $B=1,000$ bootstrapped statistics using your function for subsamples of size $100$, $1,000$ and the full sample that you generated, and make three boxplots in one graph. The true variance is given by $\nu/(\nu-2)$. Illustrate it in your graph and comment what has been obtained. Does it illustrate some concepts in statistics or probability theory?
 
@@ -93,6 +111,7 @@ mydata <- dt(samplesize, df = 3)                                        # data w
 
 # Bootstraping in full sample
 full_sample <- Bootstrap(data = mydata, B = 1000L, Statistic = var)
+
 plot_full <- ggplot(as.data.frame(full_sample), aes(y=thêta_hat)) + 
   geom_boxplot(notch=TRUE) 
 #+ 
@@ -101,73 +120,95 @@ plot_full <- ggplot(as.data.frame(full_sample), aes(y=thêta_hat)) +
 
 # Subsample for size 100
 
-Subsample_100 <- dt((1:100), df = 3)   
+Subsample_100 <- dt((mydata[1:100]), df = 3)   
 boostrap_Subsample_100 <- Bootstrap(data = Subsample_100, B = 1000L, Statistic = var)
 plot_100 <- ggplot(as.data.frame(boostrap_Subsample_100), aes(y=thêta_hat)) + 
   geom_boxplot(notch=TRUE) 
 #+ geom_hline(yintercept=true_variance, color= "red")
 
-# Subsample for size 1
+# Subsample for size 1000
 
-Subsample_1 <- dt((1), df = 3)   
-boostrap_Subsample_1 <- Bootstrap(data = Subsample_1, B = 1000L, Statistic = var)
-plot_1 <- ggplot(as.data.frame(boostrap_Subsample_1), aes(y=thêta_hat)) + 
-  geom_boxplot(notch=TRUE) 
-#+ geom_hline(yintercept=true_variance, color= "red")
-
-# Subsample for size 100
-
-Subsample_000 <- dt((000), df = 3)   
-boostrap_Subsample_000 <- Bootstrap(data = Subsample_000, B = 1000L, Statistic = var)
-plot_000 <- ggplot(as.data.frame(boostrap_Subsample_000), aes(y=thêta_hat)) + 
+Subsample_1000 <- dt(mydata[1:1000], df = 3)   
+boostrap_Subsample_1000 <- Bootstrap(data = Subsample_1000, B = 1000L, Statistic = var)
+plot_1000 <- ggplot(as.data.frame(boostrap_Subsample_1000), aes(y=thêta_hat)) + 
   geom_boxplot(notch=TRUE) 
 #+ geom_hline(yintercept=true_variance, color= "red")
 
 # Compute the true variance
-v = (3-1)
-true_variance <- (v/(v-2))
+v <- (3)
+true_variance <- (v / (v-2))
 
 library(ggplot2)
 library(gridExtra)
 
 ```
 
+I have simulate a sample of size $10^4$ from a $t$-distribution with $\nu=3$ degrees of freedom. I have run 3 different boostraps using variance `var` as the `statistic`, for the following subsamples of size $100$, $1,000$  with  $B=1,000$. You can see the four boxplots.
+
+When we compare the output with the true variance, which is given by $\nu/(\nu-2)$ = `r true_variance`. We can observe that `r true_variance`  is really high compare to the `r `varboot`. 
+
+Does it illustrate some concepts in statistics or probability theory? *ANSWER TO IT*
+
+<br>
+
 ```{r, message = FALSE}
-grid.arrange(plot_full, plot_100,plot_1,plot_000,  nrow = 1)
+grid.arrange(plot_full, plot_100,plot_1000,  nrow = 1)
 ```
 
 3.  Take the one of the subsample of 2., and compare the performances between your implementation of `bootstrap` with the function bootstrap from the bootstrap package (installation required). Make sure the comparison is as fair as possible (same number of bootstrap samples, ...).
 
-```{r, message = FALSE}
+In order to compare the performance of our implementation of `Bootstrap` we build to the function bootstrap from the bootstrap package. In order to make it as fair as possible, I'm going to take the subsample $1,000$ to have same number of bootstrap samples. Furthermore, I apply the same statistic to have also the same basis. 
+
+Note that I tried to use the subsample $100$, <i> Profvis produces error : No parsing data available. Maybe your function was too fast? </i> Thus I  increase the subsample to $1,000$ to make the computation longer.
+
+```{r, message = FALSE, warning=FALSE}
 #compare the performances 
-
 set.seed(626)
-
 profvis::profvis({
   # Profiling boostrap_Subsample_100
-Subsample_100 <- dt((1:100), df = 3)   
-boostrap_Subsample_100 <- Bootstrap(data = Subsample_100, B = 1000L, Statistic = var)
+  
+Subsample_1000 <- dt(mydata[1:1000], df = 3)     
+boostrap_Subsample_1000 <- Bootstrap(data = Subsample_1000, B = 1000L, Statistic = var)
 
   })
 ```
 
 ```{r, message = FALSE}
-  # Profiling Bootstrap with bootstrap package from R
 set.seed(626)
 profvis::profvis({
-  
-boot(mydata, statistic = var, R=1000L)
+  # Profiling Bootstrap with bootstrap package from R boostrap_Subsample_100
+Subsample_1000 <- dt(mydata[1:1000], df = 3)    
+boot_Subsample_1000 <- boot(Subsample_1000, statistic = var, R=1000L)
   })
 ```
+
 <br>
 <br>
-4.  Load `test1.rds` and make this call `bootstrap(a, statistic = mean)`. The call must returns the following error:
+
+Thus, the memory usage and computation time for the Bootstrap **using my function** are : <br>
+-Memory usage : 27 MB <br>
+-Computation time: 810 (ms) <br>
+
+And the memory usage and computation time for Bootstrap **using the function from R** are: <br>
+-Memory usage : 0 MB <br>
+-Computation time : 20 (ms) <br>
+
+Based on the profiling, we can see that the the computation time using my function is much higher that the case of using the function from R, however, these 2 functions are hardly comparable even though we use the same data as an input. 
+
+Indeed, `boot` from R package can return error, warning and different other messages, it is optimize and perfom much more than my computation. Theses different implementations increase the time of computing. 
+<br>
+<br>
+
+4.  Load `test1.rds` and make this call `bootstrap(a, statistic = mean)`. The call must returns the following error: Error in bootstrap(a, statistic = mean) : 'x' must be numeric
+
 ```{r echo = FALSE, include = FALSE, message = FALSE}
 
 library(rstan)
 test1 <- readRDS("~/Desktop/GitHub/homework-3-group_f/test1.rds")
 typeof(test1)
 call(test1)
+
+a <- test1
 
 ```
 
@@ -230,7 +271,11 @@ Bootstrap <- function(data, B, Statistic) {
 }
 
 ```
-Adapt your implementation until this error message shows.
+
+In order to have this error message, I need to adapt my implementation by addition a section which will catch error on the type of the dataset I use for input. Indeed, I have use the function `stop` to have the error show and use a `if` to specify the typeof my input. 
+Thus if the input isn't numeric the error will show. 
+<br>
+<br>
 
 ```{r, error=TRUE}
 # Bootstrap(a, statistic = mean)
@@ -252,9 +297,9 @@ call(test2)
 Bootstrap <- function(data, B, Statistic) {
   
   # Error and Warning message 
-  if (typeof(data) == "character") {
+  if (typeof(data) == "double") {
     data <- as.vector(data)
-    warning(" 'x' has been coerced to a vector")
+    warning(" 'x' has been coerced to a vector ")
   }
   
   # Code if everything is okay
@@ -304,13 +349,19 @@ Bootstrap <- function(data, B, Statistic) {
    }
   }
 ```
-it means that `M` is treated as a vector (dim is NULL). Modify your implementation in order to coerce `M` to a vector and show the above warning once the coercion happens.
 
-```{r, error=TRUE}
+In order to have this warning message show, I need to adapt my implementation by addition a section which will catch changement which is apply on the input. Indeed the idea here is to treat `M`  as a vector, this modification is call coercion.
+To do so I have use the function `warning` and modify my the data into a vector of dim NULL. 
+
+Thus this message will occur and the code will continue to RUN. 
+
+<br>
+<br>
+```{r, error=TRUE, results = 'hide'}
 Bootstrap(M,B = 1000L, Statistic = mean)
 ```
 
-6. Modify your implementation of `bootstrap` so `bootstrap(M, B="a", statistic = mean)` shows the following error
+6. Modify your implementation of `bootstrap` so `bootstrap(M, B="a", statistic = mean)` shows the following error: Error in bootstrap(M, B = "a", statistic = mean) : 'B' must be numeric
 
 ```{r echo = FALSE, include = FALSE, message = FALSE}
 
@@ -372,12 +423,23 @@ Bootstrap <- function(data, B, Statistic) {
 }
 ```
 
+In order to have this error message, I need to adapt my implementation by addition a section which will catch error on the type of the dataset I use for input. Indeed, I have use the function `stop` to have the error show and use a `if` to specify the typeof B is not a numeric. 
+
+Thus if the input isn't numeric the error will show. 
+<br>
+<br>
+
 ```{r, error=TRUE}
 Bootstrap(M, B = "a", Statistic = mean)
 ```
 
-7. Modify your implementation of `bootstrap` so `bootstrap(M, statistic = "mean")` shows the following error
+7. Modify your implementation of `bootstrap` so `bootstrap(M, statistic = "mean")` shows the following error: Error in bootstrap(M, statistic = "mean"") : 'statistic' must be a function
 
+In order to have this error message, I need to adapt the implementation of the statistic. Indeed, I have use the function `stop` to have the error show and use a `if` to specify the typeof statistic is not a function. To make easier i run the following condition: (Statistic != "var" | Statistic != "mean" ).
+
+Thus if the statistic isn't a function the error will show. 
+<br>
+<br>
 
 ```{r echo = FALSE, include = FALSE, message = FALSE}
 #Error in bootstrap(M, statistic = "mean"") : 'statistic' must be a function
@@ -446,7 +508,7 @@ Bootstrap(mydata, B = 1000L, Statistic = "mean")
 ```
 8. Load `test3.rds` and see what happens when executing `bootstrap(m, statistic = mean)`. Remove any missing value from `m` and re-run the function calls. Removing missing values should happen within the function calls. The function `mean` has an argument for removing missing values, namely `mean(m, na.rm=TRUE)`. You are to exploit that, but `bootstrap(m, statistic = mean(na.rm = TRUE))` does not work (try it).  Modify your implementation by using `...` as an argument in order for `bootstrap(m, statistic = mean, na.rm = TRUE)` to return the expected results.
 
-```{r }
+```{r echo = FALSE, include = FALSE, message = FALSE}
 library(rstan)
 test3 <- load("~/Desktop/GitHub/homework-3-group_f/test3.rds")
 typeof(test3)
@@ -456,7 +518,7 @@ call(test3)
 
 ```
 
-```{r}
+```{r echo = FALSE, include = FALSE, message = FALSE}
 Bootstrap <- function(data, B, Statistic, na.rm) {
   
   if (na.rm == TRUE) {
@@ -513,6 +575,11 @@ Bootstrap <- function(data, B, Statistic, na.rm) {
 }
 
 ```
+
+After loading `test3.rds` , we can observe that there's a lot of NA. In order to remove them within the function calls. I have added another input which I named `na.rm` it will work as a dummy variable. If TRUE, then we will omit the NA, if it's FALSE we will include the NA in the calculation
+
+<br>
+<br>
 
 ```{r}
 Bootstrap(m, B = 1000L, Statistic = mean, na.rm = TRUE)
