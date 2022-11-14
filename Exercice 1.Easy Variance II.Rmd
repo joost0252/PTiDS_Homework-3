@@ -204,7 +204,7 @@ Indeed, `boot` from R package can return error, warning and different other mess
 ```{r echo = FALSE, include = FALSE, message = FALSE}
 
 library(rstan)
-test1 <- readRDS("~/Desktop/GitHub/homework-3-group_f/test1.rds")
+test1 <- readRDS("test1.rds")
 typeof(test1)
 call(test1)
 
@@ -285,7 +285,7 @@ Bootstrap(data = a , B = 1000L, Statistic = mean)
 5. Load `test2.rds` and execute `bootstrap(M, statistic = mean)`. The call must returns the following warning:
 ```{r echo = FALSE, include = FALSE, message = FALSE}
 library(rstan)
-test2 <- load("~/Desktop/GitHub/homework-3-group_f/test2.rds")
+test2 <- load("test2.rds")
 typeof(test2)
 
 call(test2)
@@ -510,7 +510,7 @@ Bootstrap(mydata, B = 1000L, Statistic = "mean")
 
 ```{r echo = FALSE, include = FALSE, message = FALSE}
 library(rstan)
-test3 <- load("~/Desktop/GitHub/homework-3-group_f/test3.rds")
+test3 <- load("test3.rds")
 typeof(test3)
 
 call(test3)
@@ -607,7 +607,7 @@ params_0 <- c(
 ```
 
 # 3) initialize Z0 and times from 0-150 days
-````{r}
+```{r}
 Z_0 <- c(S=8756000,
 I =44000,
 R=0,
@@ -672,14 +672,14 @@ loss <- function(parameters){
   D <- solution[, 5] # 5th column of ODE solution
   return(sum((I-Z_data$I)^2 + (D-Z_data$D)^2+(R-Z_data$R)^2+(S-Z_data$S)^2))
 }
-````
+```
 
 
 #7 minimze loss function with optim() function. Use method = "L-BFGS-B" and restrict parameters to be positive lower = 
 ```{r}
 params_opt <- optim(par = params_0, fn = loss, method = "L-BFGS-B", lower = c(0,0,0), upper = c(1,1,1))
 params_opt
-````
+```
 
 #8) run ode (Z0,times,sird model,params_opt) and plot the zfit and Z_data
 
