@@ -1,3 +1,17 @@
+---
+title: "Homework 3"
+author: "Joost"
+date: "2022-11-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Question 1
+## Question 2
+a)
+```{r montecarlo, echo=FALSE}
 f <- function(x) {
   return(exp(x) * log(x))
 }
@@ -40,12 +54,17 @@ find_integral <- function(f, xlim, N = 1000, seed = 10, make_plot = FALSE){
 find_integral()
 
 
-# question b.
-# N = 10       gives: -0.6344028
-# N = 100      gives:  0.2654028
-# N = 1000     gives:  1.184418
-# N = 10000    gives:  1.105195
-# N = 100000   gives:  1.065235
-# N = 1000000  gives:  1.083766
-# N = 10000000 gives:  1.089825
-# From the above results it can be concluded that increasing the N by tenfold will increase the accuracy of the approximation.
+
+```
+b)  
+N = 10       gives: -0.6344028  
+N = 100      gives:  0.2654028  
+N = 1000     gives:  1.184418  
+N = 10000    gives:  1.105195  
+N = 100000   gives:  1.065235  
+N = 1000000  gives:  1.083766  
+N = 10000000 gives:  1.089825  
+From the above results it can be concluded that increasing the N by tenfold will increase the accuracy of the approximation.  
+  
+## Question 3  
+## Question 4  
