@@ -642,7 +642,7 @@ From the above results it can be concluded that increasing the N by tenfold will
 ### Problem 4 
 
 
-#Separate the table into times when the observations are recoded and the states of the population Z_data.
+1) Separate the table into times when the observations are recoded and the states of the population Z_data.
 ```{r, echo=T}
 # 1 )  load data
 Z_data<-read.csv("sird_data.csv", header = TRUE)
@@ -651,8 +651,8 @@ Z_data<-read.csv("sird_data.csv", header = TRUE)
 
 ```
 
-# 2) Initialize your "wild guess" of the parameters that you think are true
-```{r}
+2) Initialize your "wild guess" of the parameters that you think are true
+```{r,echo = T}
 params_0 <- c(
   beta = 0.7, # infection rate 
   gamma = 0.3,# recovery rate
@@ -660,8 +660,8 @@ params_0 <- c(
 
 ```
 
-# 3) initialize Z0 and times from 0-150 days
-```{r}
+3) initialize Z0 and times from 0-150 days
+```{r,echo = T}
 Z_0 <- c(S=8756000,
 I =44000,
 R=0,
@@ -672,7 +672,7 @@ N = Z_data$S[1] + Z_data$I[1] + Z_data$R[1] + Z_data$D[1]
 time <- seq(0, 150, by = 1)
 ```
 
-# 4) define function sird_model() that returns derivative over time of S(t), I(t), R(t), D(t)
+4) Define function sird_model() that returns derivative over time of S(t), I(t), R(t), D(t)
 
 ````{r}
 sird_model <- function(time, Z, par) {
@@ -696,9 +696,9 @@ sird_model <- function(time, Z, par) {
 
 ````
 
-#5 ) solve the model using ode() function to get the population dynamics over time with your "wild guess"ed parameters
+5) Solve the model using ode() function to get the population dynamics over time with your "wild guess"ed parameters
 
-````{r}
+````{r, echo =T}
 pt_5<-ode(y = Z_0, times = time, func = sird_model, parms = params_0)
 #pt_5
 PTS_55 <-melt(pt_5)
@@ -714,9 +714,9 @@ geom_line(aes(x=X1,y=value,colour =X2,group =X2))
 
 `````
 
-#6 ) It is time to find the best parameters that characterize the disease. Define the loss function as the sum of squared errors across all population groups
+6) It is time to find the best parameters that characterize the disease. Define the loss function as the sum of squared errors across all population groups
 
-```{r}
+```{r, echo =T}
 loss <- function(parameters){
   names(parameters) <- c("beta", "gamma", "mu") # parameters must be named
   solution <- ode(y = Z_0, times = time, func = sird_model, parms = parameters) #fited
@@ -728,16 +728,15 @@ loss <- function(parameters){
 }
 ```
 
-
-#7 minimze loss function with optim() function. Use method = "L-BFGS-B" and restrict parameters to be positive lower = 
-```{r}
+7)  minimze loss function with optim() function. Use method = "L-BFGS-B" and restrict parameters to be positive lower = 
+```{r, echo=T}
 params_opt <- optim(par = params_0, fn = loss, method = "L-BFGS-B", lower = c(0,0,0), upper = c(1,1,1))
 params_opt
 ```
 
-#8) run ode (Z0,times,sird model,params_opt) and plot the zfit and Z_data
+8) run ode (Z0,times,sird model,params_opt) and plot the zfit and Z_data
 
-````{r}
+````{r, echo=T}
 Z_exo <- melt(Z_data) # melt Z_data better layout for plotting
 Z_2<-Z_exo[152:nrow(Z_exo),] # remove t values
 
