@@ -8,7 +8,7 @@ packages <- c(
   "tidyverse", "kableExtra", "microbenchmark",
   "ggplot2", "plot.matrix", "rstan", "quanteda",
   "quanteda.textstats", "lexicon", "tidytext", "reshape2",
-  "rstan" #readRDS
+  "rstan",'deSolve','stats',"MASS",'ModelMetrics',"reshape" #readRDS
 )
 
 purrr::walk(packages, library, character.only = TRUE)
