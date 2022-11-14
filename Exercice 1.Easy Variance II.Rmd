@@ -4,11 +4,6 @@ author: "Amina Mohammed (17301920), Joost Dijkstra (2095148183),Edward Tandia (1
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: html_document
 ---
-To do list:
-
-Ex1: Amina
-Ex3: Joost
-Ex4: Edward 
 
 ```{r, echo = FALSE, include = FALSE, message = FALSE}
 source(here::here("Setup.R"))
